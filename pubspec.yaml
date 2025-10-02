@@ -1,0 +1,39 @@
+name: barcode_sync_app
+description: App Flutter para escanear códigos y sincronizar con Google Drive (Clean Architecture)
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Estado e inyección
+  flutter_riverpod: ^2.5.1
+  get_it: ^7.7.0
+
+  # UI & navegación
+  go_router: ^14.2.0
+
+  # Escaneo cámara
+  mobile_scanner: ^6.0.2
+
+  # SQLite
+  sqflite: ^2.3.3
+  path_provider: ^2.1.3
+  path: ^1.9.0
+
+  # Google Sign-In y Drive API
+  google_sign_in: ^6.2.1
+  googleapis: ^13.2.0  # incluye drive v3
+  http: ^1.2.2
+
+  # Utilidades
+  uuid: ^4.4.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0

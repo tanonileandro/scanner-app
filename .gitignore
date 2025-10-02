@@ -1,0 +1,92 @@
+# -------------------------------------------------------------------
+# Miscellaneous (archivos temporales y de sistema)
+# -------------------------------------------------------------------
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+.metadata
+
+.dart_tool/
+
+# -------------------------------------------------------------------
+# IntelliJ / Android Studio related
+# -------------------------------------------------------------------
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# -------------------------------------------------------------------
+# VS Code (configuración de workspace / launch / tasks)
+# -------------------------------------------------------------------
+.vscode/
+
+# -------------------------------------------------------------------
+# Flutter / Dart / Pub related
+# -------------------------------------------------------------------
+**/doc/api/                      # docs generados por dartdoc
+**/ios/Flutter/.last_build_id    # marca de última build iOS
+.dart_tool/                      # carpetas internas de Dart
+.flutter-plugins                  # plugins instalados
+.flutter-plugins-dependencies    # dependencias de plugins
+.packages                        # apuntadores a paquetes pub
+.flutter-versions                # versión de Flutter usada
+.pub-cache/                      # cache global de paquetes
+.pub/                            # cache local de paquetes
+**/build/
+
+# -------------------------------------------------------------------
+# Android specific
+# -------------------------------------------------------------------
+/android/.gradle/                # cache de Gradle
+/android/.idea/                  # configuraciones de Android Studio
+/android/local.properties        # rutas SDK locales
+/android/key.properties          # claves de firma locales
+/android/app/debug               # builds debug
+/android/app/profile             # builds profile
+/android/app/release             # builds release
+
+# -------------------------------------------------------------------
+# Gradle
+# -------------------------------------------------------------------
+.gradle/                         # carpeta global de Gradle
+
+# -------------------------------------------------------------------
+# iOS / CocoaPods
+# -------------------------------------------------------------------
+ios/Pods/                        # dependencias CocoaPods
+ios/Runner.xcworkspace/          # workspace Xcode generado
+ios/Flutter/Flutter.framework    # framework de Flutter iOS
+ios/Podfile.lock                 # lockfile de pods
+
+# -------------------------------------------------------------------
+# Xcode
+# -------------------------------------------------------------------
+*.xcworkspace                    # workspaces de Xcode
+*.xccheckout                     # Xcode checkout files
+*.xcuserstate                    # estado de usuario Xcode
+xcuserdata/                      # datos de usuario de proyecto Xcode
+DerivedData/                     # data derivada de compilación
+
+# -------------------------------------------------------------------
+# Windows
+# -------------------------------------------------------------------
+*.exe
+*.dll
+*.pdb
+*.vs/                            # carpeta de entorno Visual Studio
+
+# -------------------------------------------------------------------
+# Keystores y otros secretos
+# -------------------------------------------------------------------
+*.keystore                       # archivos de firma (no versionar)
+

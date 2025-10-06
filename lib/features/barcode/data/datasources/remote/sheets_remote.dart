@@ -1,7 +1,6 @@
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/sheets/v4.dart' as sheets;
 import 'package:http/http.dart' as http;
-
 import '../../models/barcode_model.dart';
 
 class SheetsRemote {
@@ -24,18 +23,11 @@ class SheetsRemote {
     required List<BarcodeModel> items,
   }) async {
     final api = await _api();
-
-    // Solo 2 columnas como pediste: transport, code
     final values = items.map((e) => [e.transport, e.code]).toList();
-
     final valueRange = sheets.ValueRange.fromJson({'values': values});
-
     await api.spreadsheets.values.append(
-      valueRange,
-      spreadsheetId,
-      '$sheetName!A:B',
-      valueInputOption: 'RAW',
-      insertDataOption: 'INSERT_ROWS',
+      valueRange, spreadsheetId, '$sheetName!A:B',
+      valueInputOption: 'RAW', insertDataOption: 'INSERT_ROWS',
     );
   }
 

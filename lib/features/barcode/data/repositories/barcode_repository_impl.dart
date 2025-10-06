@@ -16,6 +16,9 @@ class BarcodeRepositoryImpl implements BarcodeRepository {
   @override
   Future<Result<void>> add(BarcodeItem item) async {
     try {
+      if (await dao.existsCode(item.code)) {
+        return Result.err('El código ya fue escaneado.');
+      }
       await dao.insert(BarcodeModel.fromEntity(item));
       return Result.ok(null);
     } catch (e, s) {
@@ -26,10 +29,9 @@ class BarcodeRepositoryImpl implements BarcodeRepository {
   @override
   Future<Result<List<BarcodeItem>>> all() async {
     try {
-      final rows = await dao.getAll(); // List<BarcodeModel>
-      // Dart genéricos son invariantes → convertir de forma segura
-      final items = List<BarcodeItem>.from(rows);
-      return Result.ok(items);
+      final rows = await dao.getAll();
+      final list = List<BarcodeItem>.from(rows);
+      return Result.ok(list);
     } catch (e, s) {
       return Result.err('Error leyendo base local', e, s);
     }
@@ -58,7 +60,7 @@ class BarcodeRepositoryImpl implements BarcodeRepository {
   @override
   Future<Result<void>> syncWithDrive() async {
     try {
-      final rows = await dao.getAll(); // List<BarcodeModel>
+      final rows = await dao.getAll();
       await remote.uploadCsv(rows);
       return Result.ok(null);
     } catch (e, s) {
@@ -66,16 +68,17 @@ class BarcodeRepositoryImpl implements BarcodeRepository {
     }
   }
 
-  // (Opcional) método para Sheets si lo usás desde la UI:
+  @override
   Future<Result<void>> syncWithSheetLink(String sheetUrl, {String sheetName = 'Hoja 1'}) async {
     try {
-      final all = await dao.getAll();
       final id = SheetsRemote.extractSpreadsheetId(sheetUrl);
-      if (id == null) return Result.err('Link de Sheet inválido.');
-      await sheets.appendBarcodes(spreadsheetId: id, sheetName: sheetName, items: all);
+      if (id == null) return Result.err('Link de Google Sheets inválido.');
+      final rows = await dao.getAll();
+      await sheets.appendBarcodes(spreadsheetId: id, sheetName: sheetName, items: rows);
       return Result.ok(null);
     } catch (e, s) {
       return Result.err('Falló la sincronización con Google Sheets', e, s);
     }
   }
 }
+

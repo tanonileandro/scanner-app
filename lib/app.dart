@@ -1,25 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import 'features/barcode/presentation/pages/home_page.dart';
-import 'features/barcode/presentation/pages/scan_page.dart';
-import 'features/transport/presentation/pages/settings_page.dart';
+import 'features/root/presentation/root_shell.dart';
+import 'features/home/presentation/start_page.dart';
+import 'features/operation/presentation/operation_page.dart';
+import 'features/sync/presentation/sync_page.dart';
+import 'features/settings/presentation/settings_page.dart';
+import 'features/scan/presentation/scan_camera_page.dart';
+import 'features/session/presentation/session_detail_page.dart';
 
 final _router = GoRouter(
+  initialLocation: '/home',
   routes: [
-    GoRoute(path: '/', builder: (_, __) => const HomePage(), routes: [
-      GoRoute(path: 'scan', builder: (_, __) => const ScanPage()),
-      GoRoute(path: 'settings', builder: (_, __) => const SettingsPage()),
-    ]),
+    ShellRoute(
+      builder: (context, state, child) => RootShell(child: child),
+      routes: [
+        GoRoute(path: '/home', builder: (_, __) => const StartPage()),
+        GoRoute(path: '/sync', builder: (_, __) => const SyncPage()),
+        GoRoute(path: '/settings', builder: (_, __) => const SettingsPage()),
+        GoRoute(
+          path: '/operation',
+          builder: (ctx, st) {
+            final mode = st.uri.queryParameters['mode'] ?? 'cargar';
+            return OperationPage(mode: mode);
+          },
+        ),
+        GoRoute(path: '/scan-camera', builder: (_, __) => const ScanCameraPage()),
+        GoRoute(path: '/session-detail', builder: (_, __) => const SessionDetailPage()),
+      ],
+    ),
   ],
 );
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
-    final theme = ThemeData(
+    final base = ThemeData(
       useMaterial3: true,
       colorSchemeSeed: Colors.indigo,
       visualDensity: VisualDensity.adaptivePlatformDensity,
@@ -27,7 +44,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp.router(
       title: 'Barcode Sync',
       debugShowCheckedModeBanner: false,
-      theme: theme,
+      theme: base,
       routerConfig: _router,
     );
   }

@@ -6,7 +6,7 @@ import '../../../core/result.dart';
 import '../domain/entities/transport.dart';
 import '../domain/usecases/add_transport.dart';
 import '../domain/usecases/delete_transport.dart';
-import '../../transport/domain/usecases/get_transports.dart';
+import '../domain/usecases/get_transports.dart';
 
 final _uuid = const Uuid();
 
@@ -28,8 +28,7 @@ class TransportState {
     String? selected,
     bool? loading,
     String? error,
-  }) =>
-      TransportState(
+  }) => TransportState(
         items: items ?? this.items,
         selected: selected ?? this.selected,
         loading: loading ?? this.loading,
@@ -56,25 +55,19 @@ class TransportNotifier extends StateNotifier<TransportState> {
     }
   }
 
-  void select(String? name) {
-    state = state.copyWith(selected: name);
-  }
+  void select(String? name) => state = state.copyWith(selected: name);
 
   Future<void> add(String name) async {
     final t = Transport(id: _uuid.v4(), name: name.trim());
     final res = await _add(t);
-    if (res is Err<void>) {
-      state = state.copyWith(error: res.message);
-    }
+    if (res is Err<void>) state = state.copyWith(error: res.message);
     await load();
     state = state.copyWith(selected: name);
   }
 
   Future<void> delete(String id) async {
     final res = await _del(id);
-    if (res is Err<void>) {
-      state = state.copyWith(error: res.message);
-    }
+    if (res is Err<void>) state = state.copyWith(error: res.message);
     await load();
   }
 }

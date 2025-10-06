@@ -31,9 +31,10 @@ class TransportRepositoryImpl implements TransportRepository {
   Future<Result<List<Transport>>> all() async {
     try {
       final rows = await dao.getAll();
-      final list = rows
-          .map((r) => Transport(id: r['id'] as String, name: r['name'] as String))
-          .toList();
+      final list = rows.map((r) => Transport(
+        id: r['id'] as String,
+        name: r['name'] as String,
+      )).toList();
       return Result.ok(list);
     } catch (e, s) {
       return Result.err('Error leyendo transportistas', e, s);

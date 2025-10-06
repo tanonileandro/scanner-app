@@ -14,13 +14,17 @@ import '../features/barcode/domain/usecases/sync_barcodes.dart';
 import '../features/barcode/domain/usecases/delete_barcode.dart';
 import '../features/barcode/domain/usecases/clear_all.dart';
 
-// Transport
 import '../features/transport/data/datasources/local/transport_dao.dart';
 import '../features/transport/data/repositories/transport_repository_impl.dart';
 import '../features/transport/domain/repositories/transport_repository.dart';
 import '../features/transport/domain/usecases/get_transports.dart';
 import '../features/transport/domain/usecases/add_transport.dart';
 import '../features/transport/domain/usecases/delete_transport.dart';
+
+import '../features/settings/data/settings_dao.dart';
+
+import '../features/session/data/repositories/session_repository_impl.dart';
+import '../features/session/data/sessions_dao.dart';
 
 final sl = GetIt.instance;
 
@@ -36,37 +40,56 @@ Future<void> initDI() async {
   sl.registerLazySingleton<GoogleSignIn>(() => googleSignIn);
   sl.registerLazySingleton<http.Client>(() => http.Client());
 
-  // Abrimos una DB para compartirla entre DAOs
-  final db = await _openMainDb();
-  sl.registerSingleton<Database>(db);
+  // DB principal (transports + settings)
+  final mainDb = await openDatabase('main.db', version: 1, onCreate: (db, _) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS transports(
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL UNIQUE
+      );
+    ''');
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS settings(
+        key TEXT PRIMARY KEY,
+        value TEXT
+      );
+    ''');
+  });
+  sl.registerSingleton<Database>(mainDb);
 
-  // DAOs
-  final barcodeDao = BarcodeDao();
-  await barcodeDao.init(); // usa su propio archivo (barcodes.db)
-  sl.registerSingleton<BarcodeDao>(barcodeDao);
+  // Settings DAO
+  final settingsDao = SettingsDao(mainDb);
+  sl.registerSingleton<SettingsDao>(settingsDao);
 
-  final transportDao = TransportDao(db);
+  // Transport DAO/Repo
+  final transportDao = TransportDao(mainDb);
   await transportDao.createIfNeeded();
   sl.registerSingleton<TransportDao>(transportDao);
+  sl.registerLazySingleton<TransportRepository>(() => TransportRepositoryImpl(sl()));
+  sl.registerLazySingleton(() => GetTransports(sl()));
+  sl.registerLazySingleton(() => AddTransport(sl()));
+  sl.registerLazySingleton(() => DeleteTransport(sl()));
+
+  // Barcodes + Sessions (comparten barcodes.db)
+  final barcodeDao = BarcodeDao();
+  await barcodeDao.init();
+  sl.registerSingleton<BarcodeDao>(barcodeDao);
+
+  final sessionsDao = SessionsDao();
+  await sessionsDao.init(await barcodeDao.dbPath());
+  sl.registerSingleton<SessionsDao>(sessionsDao);
+  sl.registerLazySingleton(() => SessionRepository(sl()));
 
   // Remotos
-  sl.registerLazySingleton<DriveRemote>(() => DriveRemote(
-        googleSignIn: sl(),
-        httpClient: sl(),
-      ));
-  sl.registerLazySingleton<SheetsRemote>(() => SheetsRemote(
-        googleSignIn: sl(),
-        httpClient: sl(),
-      ));
+  sl.registerLazySingleton<DriveRemote>(() => DriveRemote(googleSignIn: sl(), httpClient: sl()));
+  sl.registerLazySingleton<SheetsRemote>(() => SheetsRemote(googleSignIn: sl(), httpClient: sl()));
 
-  // Repos
+  // Repository de barcodes
   sl.registerLazySingleton<BarcodeRepository>(() => BarcodeRepositoryImpl(
         dao: sl(),
         remote: sl(),
         sheets: sl(),
       ));
-
-  sl.registerLazySingleton<TransportRepository>(() => TransportRepositoryImpl(sl()));
 
   // UseCases Barcode
   sl.registerLazySingleton(() => AddBarcode(sl()));
@@ -74,22 +97,4 @@ Future<void> initDI() async {
   sl.registerLazySingleton(() => SyncBarcodes(sl()));
   sl.registerLazySingleton(() => DeleteBarcode(sl()));
   sl.registerLazySingleton(() => ClearAll(sl()));
-
-  // UseCases Transport
-  sl.registerLazySingleton(() => GetTransports(sl()));
-  sl.registerLazySingleton(() => AddTransport(sl()));
-  sl.registerLazySingleton(() => DeleteTransport(sl()));
-}
-
-Future<Database> _openMainDb() async {
-  // Base mínima solo para tabla 'transports'; 'barcodes' está en su propio archivo.
-  // Si preferís unificar, podemos migrar luego.
-  return openDatabase('main.db', version: 1, onCreate: (db, _) async {
-    await db.execute('''
-      CREATE TABLE IF NOT EXISTS transports(
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL UNIQUE
-      );
-    ''');
-  });
 }
